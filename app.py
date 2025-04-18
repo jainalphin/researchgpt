@@ -141,7 +141,3 @@ if groq_api_key:
 else:
     st.warning("⚠️ Please enter your Groq API key in the sidebar to start chatting.")
     # Display demo image if available
-    try:
-        st.image("demo_image.png", caption="Sample conversation with ResearchGPT")
-    except:
-        pass
