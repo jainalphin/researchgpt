@@ -1,22 +1,38 @@
-# https://huggingface.co/docs/hub/en/spaces-github-actions
+# .github/workflows/sync-to-hub.yml
 name: Sync to Hugging Face hub
+
 on:
   push:
     branches: [main]
 
-  # to run this workflow manually from the Actions tab 
+  # Manual trigger
   workflow_dispatch:
 
 jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          lfs: false
+          lfs: true  # ✅ Enable LFS during checkout
 
-      - name: Push to hub
+      - name: Install Git LFS
+        run: |
+          sudo apt-get update
+          sudo apt-get install git-lfs
+          git lfs install
+
+      - name: Track common binary types
+        run: |
+          git lfs track "*.png" "*.jpg" "*.jpeg" "*.zip"
+          git add .gitattributes
+          git commit -m "Track binary files with Git LFS" || echo "No .gitattributes changes"
+
+      - name: Push to Hugging Face Hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push --force https://AlphJain:$HF_TOKEN@huggingface.co/spaces/AlphJain/SearchGPT main
+        run: |
+          git remote add hf https://AlphJain:$HF_TOKEN@huggingface.co/spaces/AlphJain/SearchGPT
+          git push hf main --force
